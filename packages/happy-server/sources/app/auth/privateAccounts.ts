@@ -9,8 +9,8 @@ export const isPrivateSite = () => process.env.HAPPY_PRIVATE_SITE !== 'false';
 export const inviteHash = (code: string) => createHash('sha256').update(code.trim()).digest('hex');
 export const normalizeUsername = (username: string) => username.trim().toLowerCase();
 export const siteDefaults = {
-    title: 'Happy', icpNumber: '京ICP备2025125963号-1', icpUrl: 'https://beian.miit.gov.cn/',
-    policeNumber: '京公网安备11010502056950号', policeUrl: 'https://beian.mps.gov.cn/#/query/webSearch',
+    title: 'Happy', icpNumber: '', icpUrl: 'https://beian.miit.gov.cn/',
+    policeNumber: '', policeUrl: 'https://beian.mps.gov.cn/#/query/webSearch',
 };
 
 export class PrivateAccountError extends Error {
@@ -21,6 +21,8 @@ export type Registration = {
     username: string; passwordProof: string; publicKey: string;
     encryptedSecret: string; secretSalt: string; secretNonce: string;
     inviteCode?: string;
+    icpNumber?: string;
+    policeNumber?: string;
 };
 
 export async function accountCanLogin(accountId: string): Promise<boolean> {
@@ -64,7 +66,11 @@ export async function createPrivateAccount(input: Registration, bootstrap: boole
                 encryptedSecret: input.encryptedSecret, secretSalt: input.secretSalt, secretNonce: input.secretNonce,
                 role: bootstrap ? 'admin' : 'user',
             } });
-            if (bootstrap) await tx.siteSettings.create({ data: { id: 'site', administratorAccountId: account.id } });
+            if (bootstrap) await tx.siteSettings.create({ data: {
+                id: 'site', administratorAccountId: account.id,
+                icpNumber: input.icpNumber?.trim() ?? '', policeNumber: input.policeNumber?.trim() ?? '',
+                filingConfigured: !!(input.icpNumber?.trim() || input.policeNumber?.trim()),
+            } });
             return account;
         });
     } catch (error) {

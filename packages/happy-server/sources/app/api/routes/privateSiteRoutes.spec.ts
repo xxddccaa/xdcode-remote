@@ -67,6 +67,15 @@ describe('private website registration with a real database', () => {
         if (app) await app.close(); if (state.db) await state.db.$disconnect(); if (pg) await pg.close();
         if (directory) rmSync(directory, { recursive: true }); vi.unstubAllEnvs();
     });
+    it('starts with empty filing information and saves only administrator-provided values', async () => {
+        expect((await app.inject({ method: 'GET', url: '/v1/site' })).json()).toMatchObject({ icpNumber: '', policeNumber: '' });
+        const result = await app.inject({ method: 'POST', url: '/v1/site/bootstrap', payload: payload('owner', { icpNumber: 'TEST-ICP-001', policeNumber: 'TEST-POLICE-001' }) });
+        expect(result.statusCode).toBe(200);
+        expect((await app.inject({ method: 'GET', url: '/v1/site' })).json()).toMatchObject({ icpNumber: 'TEST-ICP-001', policeNumber: 'TEST-POLICE-001' });
+        const updated = await app.inject({ method: 'PUT', url: '/v1/admin/site', headers: { authorization: `Bearer ${result.json().token}` }, payload: { icpNumber: '', policeNumber: '', icpUrl: 'https://beian.miit.gov.cn/', policeUrl: 'https://beian.mps.gov.cn/#/query/webSearch' } });
+        expect(updated.statusCode).toBe(200);
+        expect((await app.inject({ method: 'GET', url: '/v1/site' })).json()).toMatchObject({ icpNumber: '', policeNumber: '' });
+    });
     it('allows only one first administrator even for concurrent setup requests', async () => {
         const responses = await Promise.all(['owner-a', 'owner-b'].map((name) => app.inject({ method: 'POST', url: '/v1/site/bootstrap', payload: payload(name) })));
         expect(responses.map((result) => result.statusCode).sort()).toEqual([200, 409]);

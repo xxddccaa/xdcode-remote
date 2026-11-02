@@ -15,6 +15,8 @@ export function AccountPortal() {
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [confirmation, setConfirmation] = React.useState('');
+    const [icpNumber, setIcpNumber] = React.useState('');
+    const [policeNumber, setPoliceNumber] = React.useState('');
     const [invite, setInvite] = React.useState(() => typeof window === 'undefined' ? '' : new URL(window.location.href).searchParams.get('invite') || '');
     const [error, setError] = React.useState('');
     const [busy, setBusy] = React.useState(false);
@@ -37,6 +39,7 @@ export function AccountPortal() {
                 const proof = authChallenge(secret);
                 const result = await axios.post(`${getServerUrl()}/v1/site/${setup ? 'bootstrap' : 'register'}`, {
                     username, passwordProof, ...envelope, inviteCode: invite,
+                    ...(setup ? { icpNumber, policeNumber } : {}),
                     publicKey: encodeBase64(proof.publicKey), challenge: encodeBase64(proof.challenge), signature: encodeBase64(proof.signature),
                 });
                 token = result.data.token;
@@ -66,6 +69,11 @@ export function AccountPortal() {
                 {field('账号', username, setUsername)}
                 {field('密码', password, setPassword, true)}
                 {creating && field('确认密码', confirmation, setConfirmation, true)}
+                {setup && <>
+                    {field('ICP 编号', icpNumber, setIcpNumber)}
+                    {field('公安备案编号', policeNumber, setPoliceNumber)}
+                    <Text style={{ color: '#737373', fontSize: 12 }}>填写本站的备案信息，也可稍后在管理页设置。</Text>
+                </>}
                 {register && !setup && field('邀请码', invite, setInvite)}
                 {error ? <Text accessibilityRole="alert" style={{ color: '#b91c1c', fontSize: 14 }}>{error}</Text> : null}
                 <Pressable accessibilityRole="button" disabled={busy} onPress={() => void submit()} style={{ backgroundColor: '#171717', borderRadius: 8, padding: 14, opacity: busy ? 0.6 : 1 }}>

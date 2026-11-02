@@ -52,10 +52,13 @@ can be revoked in the same management page. Regular users cannot manage invites
 or change site settings.
 
 The site title is **Happy**. The public page displays only initialization/login
-forms and the filing footer, with no coding-agent introduction. The default
-footer displays `京ICP备2025125963号-1` and `京公网安备11010502056950号`, with the
-public-security logo stored locally and links to the filing query sites. The
-administrator can edit the filing numbers and links in `/admin`.
+forms and the filing footer, with no coding-agent introduction. Filing numbers
+are empty by default: enter the numbers belonging to your site during the first
+administrator setup, or later in `/admin`. Blank entries are hidden. The public
+security logo is stored locally; the filing query links remain configurable.
+
+On upgrade, the old built-in example pair is hidden until the administrator
+explicitly saves the site filing information. Other custom values are retained.
 
 Passwords remain in the browser. A separate derived login proof is verified
 against a salted scrypt hash on the server. The account recovery secret is

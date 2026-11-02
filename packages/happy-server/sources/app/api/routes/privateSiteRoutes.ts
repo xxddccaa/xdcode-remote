@@ -45,12 +45,13 @@ export function privateSiteRoutes(app: Fastify) {
         return {
             privateSite: isPrivateSite(), initialized: !!site,
             ...siteDefaults,
-            ...(site ? { icpNumber: site.icpNumber, icpUrl: site.icpUrl, policeNumber: site.policeNumber, policeUrl: site.policeUrl } : {}),
+            ...(site ? { icpNumber: site.filingConfigured ? site.icpNumber : '', icpUrl: site.icpUrl, policeNumber: site.filingConfigured ? site.policeNumber : '', policeUrl: site.policeUrl } : {}),
         };
     });
 
     for (const [route, bootstrap] of [['bootstrap', true], ['register', false]] as const) {
-        app.post(`/v1/site/${route}`, { preHandler: [privateOnly, limit], schema: { body: registration } }, async (request, reply) => {
+        const body = bootstrap ? registration.extend({ icpNumber: z.string().trim().max(100).optional(), policeNumber: z.string().trim().max(100).optional() }) : registration;
+        app.post(`/v1/site/${route}`, { preHandler: [privateOnly, limit], schema: { body } }, async (request, reply) => {
             const nacl = (await import('tweetnacl')).default;
             const publicKey = Buffer.from(request.body.publicKey, 'base64');
             const challenge = Buffer.from(request.body.challenge, 'base64');
@@ -105,9 +106,9 @@ export function privateSiteRoutes(app: Fastify) {
     });
     app.put('/v1/admin/site', {
         preHandler: [privateOnly, app.authenticate, adminOnly],
-        schema: { body: z.object({ icpNumber: z.string().min(1).max(100), icpUrl: httpUrl, policeNumber: z.string().min(1).max(100), policeUrl: httpUrl }) },
+        schema: { body: z.object({ icpNumber: z.string().trim().max(100), icpUrl: httpUrl, policeNumber: z.string().trim().max(100), policeUrl: httpUrl }) },
     }, async (request) => {
-        await db.siteSettings.update({ where: { id: 'site' }, data: request.body });
+        await db.siteSettings.update({ where: { id: 'site' }, data: { ...request.body, filingConfigured: !!(request.body.icpNumber || request.body.policeNumber) } });
         return { success: true };
     });
 }

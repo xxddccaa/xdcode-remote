@@ -73,9 +73,10 @@ model AccountLogin {
 model SiteSettings {
     id                     String   @id
     administratorAccountId String
-    icpNumber              String   @default("京ICP备2025125963号-1")
+    icpNumber              String   @default("")
     icpUrl                 String   @default("https://beian.miit.gov.cn/")
-    policeNumber           String   @default("京公网安备11010502056950号")
+    policeNumber           String   @default("")
+    filingConfigured       Boolean  @default(false)
     policeUrl              String   @default("https://beian.mps.gov.cn/#/query/webSearch")
     createdAt              DateTime @default(now())
 }
