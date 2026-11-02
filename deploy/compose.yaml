@@ -6,6 +6,8 @@ services:
     restart: unless-stopped
     environment:
       HAPPY_PUBLIC_URL: ${HAPPY_PUBLIC_URL:-http://localhost:3005}
+      HAPPY_PRIVATE_SITE: "true"
+      HAPPY_TRUST_PROXY: "true"
     ports:
       - "127.0.0.1:3005:3005"
     volumes:

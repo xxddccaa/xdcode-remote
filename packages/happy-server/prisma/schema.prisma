@@ -22,6 +22,7 @@ datasource db {
 model Account {
     id              String      @id @default(cuid())
     publicKey       String      @unique
+    login           AccountLogin?
     seq             Int         @default(0)
     feedSeq         BigInt      @default(0)
     createdAt       DateTime    @default(now())
@@ -54,6 +55,40 @@ model Account {
     UserFeedItem        UserFeedItem[]
     UserKVStore         UserKVStore[]
     VoiceConversation   VoiceConversation[]
+}
+
+model AccountLogin {
+    accountId       String   @id
+    account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+    username        String   @unique
+    passwordHash    String
+    passwordSalt    String
+    encryptedSecret String
+    secretSalt      String
+    secretNonce     String
+    role            String   @default("user")
+    createdAt       DateTime @default(now())
+}
+
+model SiteSettings {
+    id                     String   @id
+    administratorAccountId String
+    icpNumber              String   @default("京ICP备2025125963号-1")
+    icpUrl                 String   @default("https://beian.miit.gov.cn/")
+    policeNumber           String   @default("京公网安备11010502056950号")
+    policeUrl              String   @default("https://beian.mps.gov.cn/#/query/webSearch")
+    createdAt              DateTime @default(now())
+}
+
+model RegistrationInvite {
+    id           String    @id @default(cuid())
+    codeHash     String    @unique
+    label        String    @default("")
+    maxUses      Int       @default(1)
+    usedCount    Int       @default(0)
+    expiresAt    DateTime
+    revokedAt    DateTime?
+    createdAt    DateTime  @default(now())
 }
 
 model TerminalAuthRequest {

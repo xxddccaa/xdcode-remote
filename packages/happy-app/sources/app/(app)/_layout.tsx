@@ -1,3 +1,7 @@
+import { useAuth } from '@/auth/AuthContext';
+import { PrivateSiteProvider, usePrivateSite } from '@/auth/privateSite';
+import { AccountPortal } from '@/components/AccountPortal';
+import { RegistrationFooter } from '@/components/RegistrationFooter';
 import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 import * as React from 'react';
@@ -14,6 +18,14 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+    return Platform.OS === 'web' ? <PrivateSiteProvider><SiteLayout /></PrivateSiteProvider> : <SiteLayout />;
+}
+
+function SiteLayout() {
+    const auth = useAuth();
+    const { site, user } = usePrivateSite();
+    const showPortal = Platform.OS === 'web' && (!site || (site.privateSite && (!site.initialized || !auth.isAuthenticated || !user)));
+    React.useEffect(() => { if (Platform.OS === 'web') document.title = 'Happy'; }, [showPortal]);
     // Keep UIKit in charge of most iPhone/iPad headers. Screens that belong to
     // the floating-glass family opt into createHeader below.
     const shouldUseCustomHeader = Platform.OS === 'android' || isRunningOnMac() || Platform.OS === 'web';
@@ -30,7 +42,7 @@ export default function RootLayout() {
             }}
         >
             <MobileGlassBackdrop enabled={!isDesktop} />
-        <Stack
+        {showPortal ? <AccountPortal /> : <Stack
             initialRouteName='index'
             screenOptions={{
                 header: shouldUseCustomHeader ? createHeader : undefined,
@@ -432,7 +444,8 @@ export default function RootLayout() {
                     headerBackTitle: t('common.back'),
                 }}
             />
-        </Stack>
+        </Stack>}
+        {Platform.OS === 'web' && <RegistrationFooter />}
         </View>
     );
 }

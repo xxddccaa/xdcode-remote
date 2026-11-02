@@ -1,3 +1,4 @@
+import { usePrivateSite } from '@/auth/privateSite';
 import { NativeScrollEvent, NativeSyntheticEvent, View, ScrollView, Pressable, Platform } from 'react-native';
 import { openExternalUrl } from '@/utils/openExternalUrl';
 import { Image } from 'expo-image';
@@ -90,6 +91,7 @@ export const SettingsView = React.memo(function SettingsView({
     ].filter(Boolean).join(' / ');
     const versionSubtitle = formatBuildSubtitle(getBuildConfig());
     const auth = useAuth();
+    const { user: siteUser, site } = usePrivateSite();
     const [devModeEnabled, setDevModeEnabled] = useLocalSettingMutable('devModeEnabled');
     const isPro = __DEV__ || useEntitlement('pro');
     const experiments = useSetting('experiments');
@@ -182,6 +184,7 @@ export const SettingsView = React.memo(function SettingsView({
             onScroll={onScroll}
             scrollEventThrottle={16}
         >
+            {siteUser?.role === 'admin' && <ItemGroup><Item title="管理" onPress={() => router.push('/admin')} /></ItemGroup>}
             {/* App Info Header */}
             <View style={{ maxWidth: layout.maxWidth, alignSelf: 'center', width: '100%' }}>
                 <View
@@ -260,7 +263,7 @@ export const SettingsView = React.memo(function SettingsView({
             )}
 
             {/* Support Us */}
-            <ItemGroup>
+            {!site?.privateSite && <ItemGroup>
                 <Item
                     title={t('settings.supportUs')}
                     subtitle={isPro ? t('settings.supportUsSubtitlePro') : t('settings.supportUsSubtitle')}
@@ -268,7 +271,7 @@ export const SettingsView = React.memo(function SettingsView({
                     showChevron={false}
                     onPress={isPro ? undefined : handleSubscribe}
                 />
-            </ItemGroup>
+            </ItemGroup>}
 
             <ItemGroup title={t('settings.connectedAccounts')}>
                 <Item

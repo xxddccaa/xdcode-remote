@@ -5,7 +5,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    env: { HAPPY_PRIVATE_SITE: 'false' },
     include: ['**/*.test.ts', '**/*.spec.ts'],
   },
   plugins: [tsconfigPaths()]
-}); 
+});

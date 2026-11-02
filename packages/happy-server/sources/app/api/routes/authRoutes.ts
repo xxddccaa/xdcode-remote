@@ -4,6 +4,7 @@ import * as privacyKit from "privacy-kit";
 import { db } from "@/storage/db";
 import { auth } from "@/app/auth/auth";
 import { log } from "@/utils/log";
+import { accountCanLogin, isPrivateSite } from '@/app/auth/privateAccounts';
 
 export function authRoutes(app: Fastify) {
     app.post('/v1/auth', {
@@ -26,6 +27,13 @@ export function authRoutes(app: Fastify) {
 
         // Create or update user in database
         const publicKeyHex = privacyKit.encodeHex(publicKey);
+        if (isPrivateSite()) {
+            const account = await db.account.findUnique({ where: { publicKey: publicKeyHex } });
+            if (!account || !await accountCanLogin(account.id)) {
+                return reply.code(403).send({ error: 'invite_required' });
+            }
+            return reply.send({ success: true, token: await auth.createToken(account.id) });
+        }
         const user = await db.account.upsert({
             where: { publicKey: publicKeyHex },
             update: { updatedAt: new Date() },

@@ -80,6 +80,7 @@ if (remoteDebugEnabled && consolidatedLogFile) {
 // Shared core options: both loggers add localTime to every entry and emit the
 // same timestamp shape. Stream selection (pretty/file) is layered on top.
 const baseOptions = {
+    redact: { paths: ['password', 'passwordProof', 'passwordHash', 'encryptedSecret', 'inviteCode', 'token', 'req.headers.authorization', 'req.body.password', 'req.body.passwordProof', 'req.body.encryptedSecret', 'req.body.inviteCode', 'body.password', 'body.passwordProof', 'body.encryptedSecret', 'body.inviteCode'], censor: '[redacted]' },
     level: isProduction && !remoteDebugEnabled ? 'error' : 'debug',
     formatters: {
         log: (object: any) => {

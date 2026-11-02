@@ -21,4 +21,5 @@ jobs:
       - run: pnpm --filter happy exec vitest run --project unit
       - run: pnpm --filter happy-app typecheck
       - run: pnpm --filter happy-server build
-      - run: pnpm --filter happy-app exec vitest run sources/utils/xdcodeModels.test.ts sources/utils/newSessionAgentSelection.test.ts sources/components/modelModeOptions.test.ts sources/sync/agentDefaults.test.ts sources/sync/messageMeta.test.ts sources/sync/machineChoices.spec.ts sources/hooks/useStartSessionFromDraft.test.ts
+      - run: pnpm --filter happy-server test
+      - run: pnpm --filter happy-app exec vitest run sources/auth/privateCredentials.test.ts sources/utils/xdcodeModels.test.ts sources/utils/newSessionAgentSelection.test.ts sources/components/modelModeOptions.test.ts sources/sync/agentDefaults.test.ts sources/sync/messageMeta.test.ts sources/sync/machineChoices.spec.ts sources/hooks/useStartSessionFromDraft.test.ts

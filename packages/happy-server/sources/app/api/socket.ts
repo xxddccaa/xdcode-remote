@@ -6,6 +6,7 @@ import { createAdapter } from "@socket.io/redis-streams-adapter";
 import { Redis } from "ioredis";
 import { log } from "@/utils/log";
 import { auth } from "@/app/auth/auth";
+import { accountCanLogin } from '@/app/auth/privateAccounts';
 import { getMetricsLabelsFromSocket, redisStreamLagMsGauge, websocketConnectionsGauge, websocketEventsCounter } from "../monitoring/metrics2";
 import { usageHandler } from "./socket/usageHandler";
 import { rpcHandler } from "./socket/rpcHandler";
@@ -78,7 +79,7 @@ export function startSocket(app: Fastify) {
         }
 
         const verified = await auth.verifyToken(token);
-        if (!verified) {
+        if (!verified || !await accountCanLogin(verified.userId)) {
             log({ module: 'websocket' }, `Invalid token provided`);
             next(new Error('Invalid authentication token'));
             return;

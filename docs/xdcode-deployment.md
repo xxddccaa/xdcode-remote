@@ -40,9 +40,28 @@ docker compose --env-file deploy/.env -f deploy/compose.yaml --profile public ps
 docker compose --env-file deploy/.env -f deploy/compose.yaml logs --tail=100 server
 ```
 
-Open `https://happy.example.com` on your phone. Create an account and save its
-recovery secret using the account backup controls. The account is identified by
-its cryptographic key; it does not use a password or hosted Happy account.
+Open `https://happy.example.com` yourself immediately after deployment. The first
+successful setup creates the administrator: choose a username and password and
+confirm the password. After setup, account creation requires an invitation.
+
+Open **Settings → 管理** (or `/admin`) to generate invitation links. Set a label,
+usage count (default 1) and validity period (default 7 days). Copy the link and
+share it with the intended person. They choose their own username and password.
+Used, expired or revoked invitations cannot create more accounts. Invitations
+can be revoked in the same management page. Regular users cannot manage invites
+or change site settings.
+
+The site title is **Happy**. The public page displays only initialization/login
+forms and the filing footer, with no coding-agent introduction. The default
+footer displays `京ICP备2025125963号-1` and `京公网安备11010502056950号`, with the
+public-security logo stored locally and links to the filing query sites. The
+administrator can edit the filing numbers and links in `/admin`.
+
+Passwords remain in the browser. A separate derived login proof is verified
+against a salted scrypt hash on the server. The account recovery secret is
+encrypted in the browser with a password-derived key; password login restores
+the same secret so sessions remain decryptable on another browser. Save the
+account recovery secret from the account backup controls as well.
 
 The first startup runs database migrations and creates a random master secret
 inside the persistent `server-data` volume. Restarts reuse that secret. The same
@@ -50,10 +69,13 @@ container serves the web UI, API, uploads and realtime connection; Caddy handles
 HTTPS and WebSocket forwarding. The internal API is bound only to server
 loopback on the host.
 
-This is a self-hosted service with public account creation. If you need only
-approved people to use it, add an authentication or registration policy before
-sharing it more widely. The initial trial does not implement an invite-only
-account system.
+The Compose deployment enables `HAPPY_PRIVATE_SITE=true`. Unknown accounts
+cannot be created through the original public-key login endpoint. Existing
+registered accounts can continue to use recovery-key login and device pairing.
+Only the first successful initialization may create an administrator. Complete
+that setup before sharing the address. Do not set `HAPPY_PRIVATE_SITE=false` on
+your public deployment; that explicit compatibility option restores the old
+open registration flow.
 
 ## Trial without a domain
 
@@ -196,3 +218,11 @@ Legacy Gemini OAuth login, if needed, requires your own `GEMINI_OAUTH_CLIENT_ID`
 and `GEMINI_OAUTH_CLIENT_SECRET` in the client environment. No upstream OAuth
 client credentials are included in this repository. xdcode uses its own
 configured providers and does not require these variables.
+
+## Updating an existing trial
+
+Pull the new `main`, then rebuild with the same Compose command. Startup applies
+the additional account/invitation tables without deleting existing data. If the
+browser already holds your old account secret, the first setup binds the new
+admin username and password to that account. Other pre-setup accounts require
+invitation registration. Keep the persistent volume and your recovery secret.

@@ -4,6 +4,7 @@ import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-
 import { onShutdown } from "@/utils/shutdown";
 import { Fastify } from "./types";
 import { authRoutes } from "./routes/authRoutes";
+import { privateSiteRoutes } from "./routes/privateSiteRoutes";
 import { pushRoutes } from "./routes/pushRoutes";
 import { sessionRoutes } from "./routes/sessionRoutes";
 import { connectRoutes } from "./routes/connectRoutes";
@@ -43,6 +44,7 @@ export async function startApi(opts: StartApiOptions = {}) {
 
     // Start API
     const app = fastify({
+        trustProxy: process.env.HAPPY_TRUST_PROXY === 'true',
         loggerInstance: logger,
         disableRequestLogging: isProduction,
         bodyLimit: 1024 * 1024 * 100, // 100MB
@@ -100,6 +102,7 @@ export async function startApi(opts: StartApiOptions = {}) {
 
     // Routes
     authRoutes(typed);
+    privateSiteRoutes(typed);
     pushRoutes(typed);
     sessionRoutes(typed);
     accountRoutes(typed);

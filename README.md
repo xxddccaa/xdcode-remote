@@ -1,4 +1,4 @@
-# xdcode Remote
+# Happy
 
 Self-hosted remote control for coding agents on your own Linux machines. Bind a
 machine once, then create and manage multiple xdcode sessions from a phone or
@@ -10,7 +10,10 @@ reasoning level. Code execution stays on the selected client machine.
 Follow [the deployment guide](docs/xdcode-deployment.md) to start the server with
 Docker Compose, enable HTTPS, authenticate a Linux client and run its daemon.
 The default trial serves the web UI and encrypted relay from one container with
-an embedded database and persistent local uploads.
+an embedded database and persistent local uploads. First setup creates an
+administrator with a username and password. Later registrations require an
+invitation from that administrator; manage invites and filing information in
+Settings → 管理. Public pages use the name Happy and display the filing footer.
 
 ```bash
 # Linux client, after installing dependencies and configuring the server URLs

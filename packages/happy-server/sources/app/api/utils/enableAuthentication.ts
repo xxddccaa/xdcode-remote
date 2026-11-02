@@ -1,6 +1,7 @@
 import { Fastify } from "../types";
 import { debug } from "@/utils/log";
 import { auth } from "@/app/auth/auth";
+import { accountCanLogin } from '@/app/auth/privateAccounts';
 
 export function enableAuthentication(app: Fastify) {
     app.decorate('authenticate', async function (request: any, reply: any) {
@@ -15,7 +16,7 @@ export function enableAuthentication(app: Fastify) {
 
             const token = authHeader.substring(7);
             const verified = await auth.verifyToken(token);
-            if (!verified) {
+            if (!verified || !await accountCanLogin(verified.userId)) {
                 debug({ module: 'auth' }, 'auth:failed reason=invalid-token');
                 return reply.code(401).send({ error: 'Invalid token' });
             }
