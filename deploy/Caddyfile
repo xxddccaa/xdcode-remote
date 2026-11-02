@@ -1,0 +1,3 @@
+{$HAPPY_DOMAIN} {
+    reverse_proxy server:3005
+}

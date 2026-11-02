@@ -1,0 +1,39 @@
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    environment:
+      HAPPY_PUBLIC_URL: ${HAPPY_PUBLIC_URL:-http://localhost:3005}
+    ports:
+      - "127.0.0.1:3005:3005"
+    volumes:
+      - server-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:3005/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 120s
+      retries: 3
+  caddy:
+    image: caddy:2-alpine
+    profiles: [public]
+    restart: unless-stopped
+    environment:
+      HAPPY_DOMAIN: ${HAPPY_DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      server:
+        condition: service_healthy
+volumes:
+  server-data:
+  caddy-data:
+  caddy-config:

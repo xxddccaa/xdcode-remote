@@ -1,0 +1,14 @@
+[Unit]
+Description=xdcode remote machine daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/xdcode-remote/client.env
+ExecStart=%h/.local/bin/xdcode-remote daemon start-sync
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
